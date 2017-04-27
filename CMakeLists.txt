@@ -18,13 +18,15 @@ message(STATUS  version: )
 message(STATUS  libraries: )
 message(STATUS  include path: )
 
+set(CMAKE_CXX_FLAGS "-std=c++11" ${CMAKE_CXX_FLAGS})
+
 if(CMAKE_VERSION VERSION_LESS 2.8.11)
   # Add OpenCV headers location to your include paths
   include_directories()
 endif()
 
 # Declare the executable target built from your sources
-add_executable(opencv_example example.cpp)
+add_executable(opencv_example main.cpp)
 
 # Link your application with OpenCV libraries
-target_link_libraries(opencv_example )
+target_link_libraries(opencv_example ${OpenCV_LIBS})
