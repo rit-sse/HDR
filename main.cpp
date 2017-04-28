@@ -9,31 +9,33 @@ using namespace std;
 using namespace cv;
 
 int main(int argc, char** argv) {
-  Mat xyz, _y_, front, x, y, z;
-  Mat input = imread("../apartment.hdr");
+  // INPUT PARSE
+  double gamma = 1.9f;
+  double saturation = 1.9f;
+  double bias = 1.9f;
 
+  // MAIN
+  Mat xyz, Y, lumOut;
+  Mat input = imread(argv[1]);
+
+  // Create the tone map for the tv
+  Mat ldr;
+  Ptr<TonemapDrago> tonemap = createTonemapDrago(gamma, saturation, bias);
+  tonemap->process(input, ldr);
+
+  // get the Y channel for the projector
   cvtColor(input, xyz, CV_BGR2XYZ);
-  extractChannel(xyz, _y_, 1);
-  extractChannel(xyz, x, 0);
-  extractChannel(xyz, y, 1);
-  extractChannel(xyz, z, 2);
+  vector<Mat> channels(3);
+  // split img:
+  split(xyz, channels);
+  channels[0] = channels[1];
+  channels[2] = channels[1];
 
-  for_each(y.begin<uchar>(), y.end<uchar>(), [](uchar& pixel) {
-      pixel = sqrt((int) pixel);
-    });
+  merge(channels, Y);
 
-  std::vector<cv::Mat> array_to_merge;
-
-  array_to_merge.push_back(x);
-  array_to_merge.push_back(y);
-  array_to_merge.push_back(x);
-
-  merge(array_to_merge, front);
-
-  cvtColor(front, input, CV_XYZ2RGB);
-
-  imshow("front", input);
-  imshow("projector", _y_);
+  // Display
+  imshow("front", ldr);
+  imshow("projector", Y);
 
   waitKey();
   return 0;
